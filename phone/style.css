@@ -1,0 +1,140 @@
+:root {
+  color-scheme: dark;
+  --bg: #0f1218;
+  --fg: #e8ecf1;
+  --dim: #9aa4b2;
+  --accent: #4f8cff;
+  --live: #2ecc71;
+  --warn: #e74c3c;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  text-align: center;
+  max-width: 420px;
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+h1 span {
+  color: var(--accent);
+}
+
+.pill {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #1c2330;
+  color: var(--dim);
+  font-size: 0.95rem;
+}
+body[data-state='streaming'] .pill {
+  background: rgba(46, 204, 113, 0.15);
+  color: var(--live);
+}
+body[data-state='kicked'] .pill,
+body[data-state='bad-token'] .pill,
+body[data-state='mic-denied'] .pill,
+body[data-state='failed'] .pill {
+  background: rgba(231, 76, 60, 0.15);
+  color: var(--warn);
+}
+
+#mic-button {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 4px solid #2a3547;
+  background: #161c26;
+  color: var(--dim);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    transform 0.1s;
+  touch-action: manipulation;
+}
+#mic-button:active {
+  transform: scale(0.96);
+}
+#mic-button.active {
+  border-color: var(--live);
+  color: var(--live);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 18px rgba(46, 204, 113, 0);
+  }
+}
+
+.meter {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: #1c2330;
+  overflow: hidden;
+}
+#meter-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--live), #f1c40f, var(--warn));
+  transition: width 60ms linear;
+}
+
+#mute-button {
+  padding: 10px 28px;
+  border-radius: 8px;
+  border: 1px solid #2a3547;
+  background: #161c26;
+  color: var(--fg);
+  font-size: 1rem;
+  cursor: pointer;
+}
+#mute-button.muted {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.detail {
+  color: var(--dim);
+  font-size: 0.95rem;
+  min-height: 2.4em;
+}
+
+footer p {
+  color: #5a6474;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}

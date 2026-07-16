@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:; media-src 'self' mediastream:; connect-src 'self'"
+    />
+    <title>No Mic? No Problem</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body data-phase="waiting">
+    <header>
+      <h1>No Mic? <span>No Problem.</span></h1>
+      <p id="conn-pill" class="pill">Waiting for your phone</p>
+    </header>
+
+    <section id="vbcable-banner" class="banner" hidden>
+      <p>
+        <strong>Virtual mic driver not found.</strong> Games need VB-CABLE (free) to see your phone
+        as a microphone.
+      </p>
+      <div class="banner-actions">
+        <button id="vbcable-setup">Set up VB-CABLE</button>
+        <button id="vbcable-dismiss" class="ghost">Use another output instead</button>
+      </div>
+    </section>
+
+    <section id="pairing" class="card">
+      <img id="qr" alt="Scan with your phone camera" />
+      <p class="url-line">or open <code id="pair-url"></code> on your phone</p>
+      <p class="hint">
+        Your phone will warn that the connection is private — that's expected. It's encrypted with
+        this PC's own certificate and never leaves your network. Tap
+        <em>Advanced&nbsp;→&nbsp;Proceed</em>.
+      </p>
+      <div class="row">
+        <label for="ip-select">Network</label>
+        <select id="ip-select"></select>
+        <button id="rotate-token" class="ghost" title="Invalidate the current QR code">
+          New code
+        </button>
+      </div>
+      <div class="row">
+        <button id="hotspot-toggle" class="ghost" hidden>Host a hotspot instead</button>
+      </div>
+      <div id="hotspot-panel" hidden>
+        <p class="hint">
+          1. Scan this with your phone's camera to join the PC's hotspot, then 2. re-scan the mic QR
+          above.
+        </p>
+        <img id="hotspot-qr" alt="Wi-Fi join QR" />
+        <p class="url-line"><code id="hotspot-creds"></code></p>
+        <button id="hotspot-stop" class="ghost">Stop hotspot</button>
+      </div>
+    </section>
+
+    <section id="streaming" class="card" hidden>
+      <div class="meter"><div id="meter-bar"></div></div>
+      <p id="stats-line" class="hint">—</p>
+      <div class="row">
+        <label for="output-select">Output</label>
+        <select id="output-select"></select>
+      </div>
+      <p id="routing-note" class="hint"></p>
+      <div class="row">
+        <label for="latency-select">Latency</label>
+        <select id="latency-select">
+          <option value="20">Low (20 ms buffer)</option>
+          <option value="40" selected>Balanced (40 ms)</option>
+          <option value="80">Stable (80 ms)</option>
+        </select>
+        <button id="mute-toggle">Mute</button>
+      </div>
+      <p class="hint">
+        In your game or Discord, select <strong>CABLE Output (VB-Audio Virtual Cable)</strong> as
+        the microphone.
+      </p>
+    </section>
+
+    <details id="settings" class="card">
+      <summary>Settings</summary>
+      <label
+        ><input type="checkbox" id="set-close-to-tray" /> Keep running in the tray on close</label
+      >
+      <label><input type="checkbox" id="set-autolaunch" /> Start with Windows</label>
+      <label><input type="checkbox" id="set-startmin" /> Start minimized</label>
+      <button id="fix-firewall" class="ghost">
+        Fix firewall (if your phone can't connect after clicking Deny)
+      </button>
+    </details>
+
+    <details id="diagnostics" class="card">
+      <summary>Diagnostics</summary>
+      <pre id="diag-text">collecting…</pre>
+      <button id="copy-diagnostics" class="ghost">Copy diagnostics</button>
+    </details>
+
+    <div id="wizard" class="modal" hidden>
+      <div class="modal-box">
+        <h2>Set up the virtual mic (VB-CABLE)</h2>
+        <p id="wizard-step">
+          VB-CABLE is free third-party software by VB-Audio (donationware) — we can't bundle it, but
+          we can fetch it for you. Windows will ask for admin permission to install the driver.
+        </p>
+        <div class="progress"><div id="wizard-progress"></div></div>
+        <div class="banner-actions">
+          <button id="wizard-go">Download &amp; install</button>
+          <button id="wizard-recheck" hidden>Re-check</button>
+          <button id="wizard-close" class="ghost">Close</button>
+        </div>
+        <p class="hint">
+          Trouble? Get it directly from
+          <a href="#" id="vbcable-homepage">vb-audio.com/Cable</a> — install, then click Re-check.
+        </p>
+      </div>
+    </div>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self' wss:; media-src 'self'"
+    />
+    <title>No Mic? No Problem — Phone Mic</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body data-state="idle">
+    <main>
+      <h1>No Mic? <span>No Problem.</span></h1>
+      <p id="status-pill" class="pill">Ready</p>
+
+      <button id="mic-button" aria-label="Toggle microphone">
+        <svg viewBox="0 0 24 24" width="72" height="72" aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"
+          />
+        </svg>
+      </button>
+
+      <div class="meter"><div id="meter-bar"></div></div>
+
+      <button id="mute-button" hidden>Mute</button>
+
+      <p id="status-detail" class="detail"></p>
+
+      <footer>
+        <p>
+          Your voice travels only across your own network to your PC — nothing is sent to the
+          internet. The one-time security warning you may have seen is your PC's own local
+          certificate.
+        </p>
+      </footer>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

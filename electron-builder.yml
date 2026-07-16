@@ -1,0 +1,28 @@
+appId: com.nomicnoproblem.app
+productName: No Mic No Problem
+copyright: MIT License
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - out/**/*
+  - package.json
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: build/icon.ico
+
+nsis:
+  # per-user, one-click: no UAC at install time. The only elevation the user
+  # ever sees is the VB-CABLE driver setup, requested in context by the app.
+  oneClick: true
+  perMachine: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  artifactName: NoMicNoProblem-Setup-${version}.${ext}
+
+publish: null
