@@ -3,6 +3,10 @@ name: Release
 on:
   push:
     tags: ['v*']
+    # Cutting a release without pushing a tag: commit a new version string to
+    # .release-version — the release action then creates the tag itself.
+    branches: ['**']
+    paths: ['.release-version']
   workflow_dispatch:
     inputs:
       tag_name:
@@ -30,10 +34,21 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npx electron-builder --win --publish never
+      - name: Resolve release tag
+        id: tag
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.tag_name }}" ]; then
+            echo "tag=${{ inputs.tag_name }}" >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=$(tr -d '[:space:]' < .release-version)" >> "$GITHUB_OUTPUT"
+          fi
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.tag_name || github.ref_name }}
+          tag_name: ${{ steps.tag.outputs.tag }}
           target_commitish: ${{ github.sha }}
           files: dist/NoMicNoProblem-Setup-*.exe
           generate_release_notes: true
