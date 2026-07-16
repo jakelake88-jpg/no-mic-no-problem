@@ -10,6 +10,14 @@ files:
   - out/**/*
   - package.json
 
+extraResources:
+  - from: build/THIRD_PARTY_LICENSES.txt
+    to: THIRD_PARTY_LICENSES.txt
+  - from: LICENSE
+    to: LICENSE.txt
+  - from: PRIVACY.md
+    to: PRIVACY.md
+
 win:
   target:
     - target: nsis

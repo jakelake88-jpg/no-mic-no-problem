@@ -9,7 +9,7 @@
   "homepage": "https://github.com/jakelake88-jpg/no-mic-no-problem",
   "scripts": {
     "dev": "npm run build:phone && electron-vite dev",
-    "build": "npm run build:phone && electron-vite build",
+    "build": "npm run gen:licenses && npm run build:phone && electron-vite build",
     "build:phone": "vite build --config vite.phone.config.ts",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "lint": "eslint .",
@@ -18,7 +18,8 @@
     "test": "vitest run",
     "test:e2e": "bash tests/e2e/run-e2e.sh",
     "dist:win": "npm run build && electron-builder --win --publish never",
-    "dist:msix": "npm run build && electron-builder --win appx --publish never"
+    "dist:msix": "npm run build && electron-builder --win appx --publish never",
+    "gen:licenses": "node scripts/gen-licenses.mjs"
   },
   "dependencies": {
     "electron-log": "^5.2.0",

@@ -18,6 +18,13 @@
 | extract-zip                   | BSD-2-Clause                         | unpacking the VB-CABLE driver pack |
 | electron-log                  | MIT                                  | structured rotating logs           |
 
+## Complete license texts
+
+Packaged builds ship the full license text of every bundled dependency in
+`resources/THIRD_PARTY_LICENSES.txt` (generated at build time by
+`scripts/gen-licenses.mjs`), plus Electron's `LICENSE.electron.txt` and the
+Chromium bundle `LICENSES.chromium.html` alongside the executable.
+
 ## Not bundled, downloaded on demand by the user
 
 - **VB-CABLE Virtual Audio Device** — © VB-Audio Software, donationware.

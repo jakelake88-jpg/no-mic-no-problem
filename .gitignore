@@ -7,3 +7,4 @@ dist/
 coverage/
 tests/e2e/.artifacts/
 *.tsbuildinfo
+build/THIRD_PARTY_LICENSES.txt
