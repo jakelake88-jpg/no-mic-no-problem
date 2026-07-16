@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
 
 jobs:
@@ -45,7 +45,8 @@ jobs:
 
   windows-installer:
     name: Build Windows installer (NSIS)
-    runs-on: ubuntu-latest
+    # native Windows runner: resource editing/signing needs wine on Linux
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
