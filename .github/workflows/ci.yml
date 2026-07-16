@@ -63,3 +63,23 @@ jobs:
         with:
           name: NoMicNoProblem-Setup
           path: dist/NoMicNoProblem-Setup-*.exe
+
+  msix-package:
+    name: Build MSIX package (Store)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      - run: npm run build
+      - run: npx electron-builder --win appx --publish never
+      - name: Upload MSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NoMicNoProblem-MSIX
+          path: dist/*.appx

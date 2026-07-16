@@ -17,7 +17,8 @@
     "format:fix": "prettier --write .",
     "test": "vitest run",
     "test:e2e": "bash tests/e2e/run-e2e.sh",
-    "dist:win": "npm run build && electron-builder --win --publish never"
+    "dist:win": "npm run build && electron-builder --win --publish never",
+    "dist:msix": "npm run build && electron-builder --win appx --publish never"
   },
   "dependencies": {
     "electron-log": "^5.2.0",

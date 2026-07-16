@@ -85,6 +85,17 @@ npm run dist:win   # NSIS installer -> dist/
 
 TypeScript everywhere, strict; `npm run lint` + `npm run typecheck` gate CI. See [docs/MANUAL_TESTING.md](docs/MANUAL_TESTING.md) for the real-hardware checklist (phone browsers, VB-CABLE routing, UAC/firewall flows).
 
+## Publishing to the Microsoft Store
+
+The Store re-signs packages after certification, so **no code-signing certificate is needed**:
+
+1. Create a free developer account at [Partner Center](https://partner.microsoft.com/dashboard) and reserve the app name.
+2. In Partner Center → your app → Product management → **Product identity**, copy the three values into the `appx:` section of `electron-builder.yml` (`identityName`, `publisher`, `publisherDisplayName`).
+3. `npm run dist:msix` (on Windows) → upload `dist/*.appx` in your Store submission. CI also builds this package as the `NoMicNoProblem-MSIX` artifact.
+4. Submission needs: pricing/markets, the IARC age-rating questionnaire, screenshots, and a privacy policy URL — point it at [PRIVACY.md](PRIVACY.md).
+
+Store builds automatically disable the VB-CABLE auto-download (Store policy) — the wizard links users to vb-audio.com instead. Everything else is identical.
+
 ## Credits & prior art
 
 Built on the shoulders of open source: the browser-mic-over-self-signed-HTTPS approach follows [russelltg/web-mic](https://github.com/russelltg/web-mic) (Linux/PulseAudio), and the Windows phone-mic UX + VB-CABLE routing pattern follows [teamclouday/AndroidMic](https://github.com/teamclouday/AndroidMic). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

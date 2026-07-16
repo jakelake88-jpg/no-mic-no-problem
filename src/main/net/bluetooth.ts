@@ -105,11 +105,10 @@ const defaultListRunner: ListRunner = (script) =>
   })
 
 const defaultSpawn: SpawnFn = (script) =>
-  spawn(
-    'powershell.exe',
-    ['-NoProfile', '-NonInteractive', '-Command', script],
-    { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] }
-  )
+  spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', script], {
+    windowsHide: true,
+    stdio: ['ignore', 'pipe', 'pipe']
+  })
 
 export class BluetoothAudio {
   private child: ChildProcess | null = null

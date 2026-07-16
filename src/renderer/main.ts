@@ -215,6 +215,14 @@ $('vbcable-homepage').addEventListener('click', (e) => {
 })
 
 wizardGo.addEventListener('click', () => {
+  if (appState?.windowsStore) {
+    // Store build: hand off to the vendor page instead of auto-installing.
+    window.api.openExternal(VBCABLE_HOMEPAGE)
+    wizardStep.textContent =
+      'Download and run the VB-CABLE installer from the page we just opened, then click Re-check.'
+    wizardRecheck.hidden = false
+    return
+  }
   wizardGo.disabled = true
   wizardStep.textContent = 'Starting download…'
   window.api.vbcableInstall().catch((err: Error) => {

@@ -83,6 +83,7 @@ async function buildState(): Promise<AppState> {
     certNotAfter: runtime.cert?.notAfter.toISOString() ?? '',
     appVersion: app.getVersion(),
     platform: process.platform,
+    windowsStore: process.windowsStore === true,
     e2e: IS_E2E
   }
 }
@@ -134,6 +135,11 @@ function registerIpc(): void {
   ipcMain.handle(IPC.vbcableRegistryCheck, () => registryHasVbCable())
 
   ipcMain.handle(IPC.vbcableInstall, async () => {
+    if (process.windowsStore) {
+      // Store policy: no third-party installer downloads from a Store build.
+      // The renderer routes users to vb-audio.com instead of calling this.
+      throw new Error('driver auto-install is disabled in the Microsoft Store build')
+    }
     const workDir = path.join(app.getPath('userData'), 'vbcable')
     await installVbCable(workDir, (p) => {
       runtime.win?.webContents.send(IPC.vbcableProgress, p)

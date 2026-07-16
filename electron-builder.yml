@@ -16,6 +16,20 @@ win:
       arch: [x64]
   icon: build/icon.ico
 
+# Microsoft Store package: `npm run dist:msix`. Store submissions are
+# re-signed by Microsoft after certification, so no code-signing cert is
+# needed. Replace the three identity placeholders with the values from
+# Partner Center -> your app -> Product management -> Product identity
+# (Package/Identity/Name, Package/Identity/Publisher, PublisherDisplayName).
+appx:
+  identityName: REPLACE.WITH.PartnerCenter.IdentityName
+  publisher: CN=REPLACE-WITH-PARTNER-CENTER-PUBLISHER-GUID
+  publisherDisplayName: REPLACE WITH PublisherDisplayName
+  displayName: No Mic No Problem
+  applicationId: NoMicNoProblem
+  backgroundColor: '#0f1218'
+  showNameOnTiles: true
+
 nsis:
   # per-user, one-click: no UAC at install time. The only elevation the user
   # ever sees is the VB-CABLE driver setup, requested in context by the app.

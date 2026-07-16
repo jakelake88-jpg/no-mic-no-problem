@@ -53,6 +53,8 @@ export interface AppState {
   certNotAfter: string
   appVersion: string
   platform: string
+  /** Running as a Microsoft Store (MSIX) install — driver auto-download is disabled there. */
+  windowsStore: boolean
   e2e: boolean
 }
 
