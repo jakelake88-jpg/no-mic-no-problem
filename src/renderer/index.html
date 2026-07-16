@@ -11,6 +11,14 @@
   </head>
   <body data-phase="waiting">
     <header>
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22">
+          <path
+            fill="currentColor"
+            d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"
+          />
+        </svg>
+      </div>
       <h1>No Mic? <span>No Problem.</span></h1>
       <p id="conn-pill" class="pill">Waiting for your phone</p>
     </header>
@@ -27,8 +35,9 @@
     </section>
 
     <section id="pairing" class="card">
-      <img id="qr" alt="Scan with your phone camera" />
-      <p class="url-line">or open <code id="pair-url"></code> on your phone</p>
+      <div class="qr-frame"><img id="qr" alt="Scan with your phone camera" /></div>
+      <p class="url-line">or type this address into your phone's browser:</p>
+      <p class="url-line"><code id="pair-url"></code></p>
       <p class="hint">
         Your phone will warn that the connection is private — that's expected. It's encrypted with
         this PC's own certificate and never leaves your network. Tap
@@ -49,7 +58,7 @@
           1. Scan this with your phone's camera to join the PC's hotspot, then 2. re-scan the mic QR
           above.
         </p>
-        <img id="hotspot-qr" alt="Wi-Fi join QR" />
+        <div class="qr-frame"><img id="hotspot-qr" alt="Wi-Fi join QR" /></div>
         <p class="url-line"><code id="hotspot-creds"></code></p>
         <button id="hotspot-stop" class="ghost">Stop hotspot</button>
       </div>
