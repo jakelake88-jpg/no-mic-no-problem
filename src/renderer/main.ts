@@ -307,6 +307,72 @@ async function initHotspot(): Promise<void> {
   })
 }
 
+// ---------- Bluetooth mode (experimental) ----------
+
+async function initBluetooth(): Promise<void> {
+  if (!(await window.api.btSupported())) return
+  const card = $('bluetooth')
+  const deviceSelect = $<HTMLSelectElement>('bt-device-select')
+  const connectBtn = $<HTMLButtonElement>('bt-connect')
+  const status = $('bt-status')
+  card.hidden = false
+  let connected = false
+
+  const refresh = async (): Promise<void> => {
+    const devices = await window.api.btListDevices()
+    deviceSelect.replaceChildren(
+      ...devices.map((d) => {
+        const opt = document.createElement('option')
+        opt.value = d.id
+        opt.textContent = d.name
+        return opt
+      })
+    )
+    if (devices.length === 0) {
+      const opt = document.createElement('option')
+      opt.value = ''
+      opt.textContent = 'No paired phones found — pair in Windows Bluetooth settings'
+      deviceSelect.replaceChildren(opt)
+    }
+  }
+
+  $('bt-refresh').addEventListener('click', () => void refresh())
+  $('bt-sound-settings').addEventListener('click', (e) => {
+    e.preventDefault()
+    window.api.openSoundSettings()
+  })
+
+  connectBtn.addEventListener('click', () => {
+    if (connected) {
+      window.api.btDisconnect()
+      connected = false
+      connectBtn.textContent = 'Connect'
+      status.textContent = 'Not connected'
+      return
+    }
+    if (!deviceSelect.value) return
+    window.api.btConnect(deviceSelect.value)
+  })
+
+  window.api.onBtState((e) => {
+    connected = e.state === 'connected'
+    connectBtn.textContent = connected ? 'Disconnect' : 'Connect'
+    status.textContent =
+      e.state === 'connected'
+        ? 'Connected — phone audio now plays on this PC. Start Bluetooth mode on the phone page.'
+        : e.state === 'connecting'
+          ? 'Connecting… (accept any prompt on the phone)'
+          : e.state === 'error'
+            ? `Failed: ${e.detail ?? 'unknown error'}. Is the phone paired and in range?`
+            : 'Not connected'
+  })
+
+  // card opens -> populate the list
+  card.addEventListener('toggle', () => {
+    if (card.hasAttribute('open')) void refresh()
+  })
+}
+
 // ---------- settings ----------
 
 async function initSettings(): Promise<void> {
@@ -383,7 +449,10 @@ async function boot(): Promise<void> {
   setPhase('waiting')
   await initSettings()
   await refreshOutputs()
-  if (state.platform === 'win32') void initHotspot()
+  if (state.platform === 'win32') {
+    void initHotspot()
+    void initBluetooth()
+  }
 
   window.api.onSignal((m) => void handleSignal(m))
   window.api.onPhoneConnected((ua) => {

@@ -138,3 +138,18 @@ footer p {
   font-size: 0.8rem;
   line-height: 1.4;
 }
+
+.mode-toggle {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1px dashed #2a3547;
+  background: transparent;
+  color: #5a6474;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.mode-toggle.active {
+  border-style: solid;
+  border-color: var(--accent);
+  color: var(--accent);
+}

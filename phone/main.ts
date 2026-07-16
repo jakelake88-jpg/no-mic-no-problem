@@ -1,6 +1,15 @@
 import { msg, type DesktopToPhone } from '@shared/protocol'
 import { SignalingClient, type SignalingState } from './signaling'
-import { applyAnswer, applyCandidate, captureMic, startMicSession, type MicSession } from './rtc'
+import {
+  applyAnswer,
+  applyCandidate,
+  captureMic,
+  captureMicRaw,
+  startBtLoopback,
+  startMicSession,
+  type BtLoopback,
+  type MicSession
+} from './rtc'
 
 type UiState =
   | 'idle'
@@ -23,6 +32,10 @@ const muteButton = $<HTMLButtonElement>('mute-button')
 const statusPill = $('status-pill')
 const statusDetail = $('status-detail')
 const meterBar = $('meter-bar')
+const btToggle = $<HTMLButtonElement>('bt-toggle')
+
+let btMode = false
+let btLoopback: BtLoopback | null = null
 
 const token = new URLSearchParams(location.search).get('token') ?? ''
 const wsUrl = `wss://${location.host}/ws?token=${encodeURIComponent(token)}`
@@ -48,9 +61,9 @@ function setState(state: UiState, detail = ''): void {
   uiState = state
   document.body.dataset.state = state
   const labels: Record<UiState, string> = {
-    idle: 'Ready',
+    idle: btMode ? 'Ready (Bluetooth mode)' : 'Ready',
     connecting: 'Connecting…',
-    streaming: 'Live — you are the mic',
+    streaming: btMode ? 'Live over Bluetooth' : 'Live — you are the mic',
     reconnecting: 'Reconnecting…',
     kicked: 'Another phone took over',
     'bad-token': 'Pairing code expired',
@@ -203,13 +216,66 @@ function teardownSessionKeepUi(): void {
   stopMeter()
 }
 
+// ---- Bluetooth loopback mode (experimental) ----
+// The mic is played out the phone's media output; with the phone
+// Bluetooth-connected to the PC (A2DP sink), the OS carries it over BT.
+// WARNING baked into the UX: without the BT connection this feeds back
+// through the phone speaker, so the toggle explains the order of steps.
+
+async function beginBtStreaming(): Promise<void> {
+  let stream: MediaStream
+  try {
+    stream = await captureMicRaw()
+  } catch (err) {
+    plog('error', `getUserMedia failed: ${String(err)}`)
+    setState('mic-denied')
+    return
+  }
+  btLoopback = startBtLoopback(stream)
+  startMeter(stream)
+  await acquireWakeLock()
+  setState(
+    'streaming',
+    'Streaming over Bluetooth (~0.1–0.25 s delay). Phone sounds are transmitted too — enable Do Not Disturb.'
+  )
+}
+
+function teardownBt(): void {
+  btLoopback?.close()
+  btLoopback = null
+  stopMeter()
+  void wakeLock?.release().catch(() => undefined)
+  wakeLock = null
+}
+
+btToggle.addEventListener('click', () => {
+  if (uiState !== 'idle') return // switch modes only while stopped
+  btMode = !btMode
+  btToggle.classList.toggle('active', btMode)
+  btToggle.textContent = btMode ? 'Bluetooth mode: on' : 'Bluetooth mode'
+  setState(
+    'idle',
+    btMode
+      ? 'First connect this phone to the PC in Bluetooth settings and click Connect in the desktop app — otherwise you will hear feedback. Then tap the mic.'
+      : ''
+  )
+})
+
 micButton.addEventListener('click', () => {
   if (uiState === 'streaming' || uiState === 'connecting' || uiState === 'reconnecting') {
-    signaling?.send(msg({ type: 'bye' }))
-    signaling?.stop()
-    signaling = null
-    teardownSession()
+    if (btMode) {
+      teardownBt()
+    } else {
+      signaling?.send(msg({ type: 'bye' }))
+      signaling?.stop()
+      signaling = null
+      teardownSession()
+    }
     setState('idle')
+    return
+  }
+  if (btMode) {
+    void beginBtStreaming()
     return
   }
   if (!token) {
@@ -222,10 +288,11 @@ micButton.addEventListener('click', () => {
 })
 
 muteButton.addEventListener('click', () => {
-  if (!session) return
-  session.setMuted(!session.muted)
-  muteButton.textContent = session.muted ? 'Unmute' : 'Mute'
-  muteButton.classList.toggle('muted', session.muted)
+  const target = btMode ? btLoopback : session
+  if (!target) return
+  target.setMuted(!target.muted)
+  muteButton.textContent = target.muted ? 'Unmute' : 'Mute'
+  muteButton.classList.toggle('muted', target.muted)
 })
 
 window.addEventListener('pagehide', () => {

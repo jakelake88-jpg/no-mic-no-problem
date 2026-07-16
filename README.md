@@ -7,6 +7,7 @@ Use your phone as a **wireless gaming microphone** for your Windows PC.
 - **Games see a real microphone** — routed through the free VB-CABLE virtual audio device.
 - **One-click hotspot mode** — no shared Wi-Fi? The app can host a Windows Mobile Hotspot and show a Wi-Fi join QR.
 - **USB cable mode** — plug the phone in and use the OS's built-in tethering; the most reliable, lowest-latency link. Still nothing to install on the phone.
+- **Bluetooth mode (experimental)** — the PC acts as a Bluetooth speaker (A2DP sink) and the phone streams the mic to it. Works with zero network at all, but Bluetooth adds ~0.1–0.25 s delay.
 
 ```
 Phone browser ──getUserMedia──▶ WebRTC (Opus over your LAN)
@@ -44,6 +45,17 @@ Wi-Fi flaky, firewalled, or isolated? Plug the phone into the PC and use the pho
 - **iPhone**: connect the cable → Settings → **Personal Hotspot** → Allow Others to Join. Windows needs the Apple USB driver (installed with iTunes or "Apple Devices" from the Microsoft Store).
 
 The app detects the tether link automatically, prefers it in the **Network** dropdown ("via USB cable"), and regenerates the QR. Scan and stream as usual — the audio now travels over the cable with the lowest possible latency, immune to router/firewall quirks.
+
+## Bluetooth mode (experimental)
+
+For when there's no usable network and a cable across the living room isn't happening. The PC becomes an A2DP sink (Windows 10 2004+ built-in, via the `AudioPlaybackConnection` API) and the phone streams its mic over Bluetooth like music:
+
+1. Pair the phone with the PC (Windows Settings → Bluetooth).
+2. In the app, open **Bluetooth mode (experimental)** → pick the phone → **Connect**.
+3. One-time routing: the card's _Sound settings_ link opens App volume preferences — set **Windows PowerShell** (the connection helper) output to **CABLE Input**. Windows remembers this.
+4. On the phone page, tap **Bluetooth mode**, then the mic button.
+
+Know the trade-offs (they're physics, not bugs): Bluetooth A2DP buffers ~100–250 ms end-to-end — fine for casual chat, noticeable for competitive play; and **everything the phone plays goes into the mic** (enable Do Not Disturb). The app already squeezes what it can: raw capture with no processing delay, an `interactive`-latency audio path, and phones pick the best codec the PC supports (AAC on Windows 11). Prefer Wi-Fi (~80 ms) or USB (best) when available.
 
 ## Latency
 

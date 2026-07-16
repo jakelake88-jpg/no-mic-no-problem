@@ -19,6 +19,12 @@ export const IPC = {
   hotspotCapability: 'hotspot:capability',
   hotspotStart: 'hotspot:start',
   hotspotStop: 'hotspot:stop',
+  btSupported: 'bt:supported',
+  btListDevices: 'bt:list',
+  btConnect: 'bt:connect',
+  btDisconnect: 'bt:disconnect',
+  btState: 'bt:state',
+  openSoundSettings: 'app:open-sound-settings',
   fixFirewall: 'firewall:fix',
   copyDiagnostics: 'diagnostics:copy',
   openExternal: 'app:open-external',
@@ -62,6 +68,16 @@ export interface HotspotInfo {
   wifiQrDataUrl: string
 }
 
+export interface BtDeviceInfo {
+  id: string
+  name: string
+}
+
+export interface BtStateInfo {
+  state: 'disconnected' | 'connecting' | 'connected' | 'error'
+  detail?: string
+}
+
 export type VbCableProgress =
   | { step: 'downloading'; receivedBytes: number; totalBytes: number | null }
   | { step: 'extracting' }
@@ -87,6 +103,12 @@ export interface RendererApi {
   hotspotCapability(): Promise<HotspotCapability>
   hotspotStart(): Promise<HotspotInfo>
   hotspotStop(): Promise<void>
+  btSupported(): Promise<boolean>
+  btListDevices(): Promise<BtDeviceInfo[]>
+  btConnect(deviceId: string): void
+  btDisconnect(): void
+  onBtState(cb: (e: BtStateInfo) => void): () => void
+  openSoundSettings(): void
   fixFirewall(): Promise<boolean>
   copyDiagnostics(rendererBlob: string): Promise<void>
   openExternal(url: string): void

@@ -56,6 +56,15 @@ Windows PC and real phones, and must pass before a release is tagged.
 - [ ] iPhone: Personal Hotspot over USB (Apple driver installed) → 172.20.10.x adapter detected and preferred; stream works
 - [ ] Unplugging the cable mid-stream: app rebinds to Wi-Fi within the 30 s poll, phone reconnects after re-scan
 
+## Bluetooth mode (experimental)
+
+- [ ] Paired phone appears in the Bluetooth card's device list; Connect reaches "Connected"
+- [ ] App volume routing: "Windows PowerShell" set to CABLE Input → phone BT-mode audio reaches Discord/game via CABLE Output
+- [ ] Latency sanity: measure clap-to-playback; expect 100–250 ms (SBC) / lower on Win11+AAC
+- [ ] Phone notification sounds audibly leak into the stream (documented behavior; DND hint shown)
+- [ ] Feedback guard: starting phone BT mode while NOT BT-connected produces speaker feedback — verify the warning copy shows before start
+- [ ] Disconnect (either side) → desktop card returns to "Not connected"; app quit releases the A2DP connection
+
 ## Session hardening
 
 - [ ] Second phone scanning the same QR kicks the first ("Another phone took over")

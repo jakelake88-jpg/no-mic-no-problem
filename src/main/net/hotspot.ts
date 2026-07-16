@@ -63,7 +63,7 @@ const defaultRunner: PsRunner = (script) =>
   new Promise((resolve, reject) => {
     execFile(
       'powershell.exe',
-      ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', script],
+      ['-NoProfile', '-NonInteractive', '-Command', script],
       { windowsHide: true, timeout: 30_000 },
       (err, stdout, stderr) => {
         if (err) reject(new Error(stderr.trim() || err.message))

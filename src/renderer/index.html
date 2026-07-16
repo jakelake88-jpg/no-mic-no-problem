@@ -78,6 +78,31 @@
       </p>
     </section>
 
+    <details id="bluetooth" class="card" hidden>
+      <summary>Bluetooth mode (experimental)</summary>
+      <p class="hint">
+        No Wi-Fi, no cable? Your phone can stream over Bluetooth like a speaker. Expect
+        <strong>0.1–0.25 s delay</strong> (a Bluetooth limit) and note that
+        <strong>all phone sounds</strong> go into the mic — silence notifications first.
+      </p>
+      <ol class="hint steps">
+        <li>Pair the phone with this PC (Windows Settings → Bluetooth).</li>
+        <li>Select the phone below and click Connect.</li>
+        <li>
+          One-time: route the helper's audio to the virtual mic —
+          <a href="#" id="bt-sound-settings">open Sound settings</a>, find
+          <em>Windows PowerShell</em> under App volume, set its Output to <em>CABLE Input</em>.
+        </li>
+        <li>On the phone page, tap <em>Bluetooth mode</em>, then the mic button.</li>
+      </ol>
+      <div class="row">
+        <select id="bt-device-select"></select>
+        <button id="bt-refresh" class="ghost" title="Re-scan paired devices">↻</button>
+        <button id="bt-connect">Connect</button>
+      </div>
+      <p id="bt-status" class="hint">Not connected</p>
+    </details>
+
     <details id="settings" class="card">
       <summary>Settings</summary>
       <label

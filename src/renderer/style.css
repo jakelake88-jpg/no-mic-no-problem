@@ -256,3 +256,15 @@ pre {
 #hotspot-panel[hidden] {
   display: none;
 }
+
+ol.steps {
+  text-align: left;
+  padding-left: 20px;
+  margin: 0;
+}
+ol.steps li {
+  margin: 3px 0;
+}
+details a {
+  color: var(--accent);
+}

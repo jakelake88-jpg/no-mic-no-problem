@@ -64,6 +64,62 @@ export async function captureMic(): Promise<MediaStream> {
 }
 
 /**
+ * Raw capture for Bluetooth loopback mode: every processing stage adds
+ * buffering delay, and AEC would try to cancel our own loopback signal.
+ * A2DP dominates the latency budget, so shave everything we control.
+ */
+export async function captureMicRaw(): Promise<MediaStream> {
+  return navigator.mediaDevices.getUserMedia({
+    audio: {
+      echoCancellation: false,
+      noiseSuppression: false,
+      autoGainControl: false,
+      channelCount: 1
+    },
+    video: false
+  })
+}
+
+export interface BtLoopback {
+  stream: MediaStream
+  close(): void
+  setMuted(muted: boolean): void
+  readonly muted: boolean
+}
+
+/**
+ * Bluetooth mode: play the mic straight out the phone's media output. With
+ * the phone Bluetooth-connected to the PC (which acts as an A2DP sink), the
+ * OS carries this to the PC like music. latencyHint 'interactive' asks for
+ * the smallest render quantum the device supports.
+ */
+export function startBtLoopback(stream: MediaStream, ctx?: AudioContext): BtLoopback {
+  const audioCtx = ctx ?? new AudioContext({ latencyHint: 'interactive' })
+  const source = audioCtx.createMediaStreamSource(stream)
+  const gain = audioCtx.createGain()
+  source.connect(gain)
+  gain.connect(audioCtx.destination)
+  let muted = false
+
+  return {
+    stream,
+    close() {
+      source.disconnect()
+      gain.disconnect()
+      void audioCtx.close()
+      stream.getTracks().forEach((t) => t.stop())
+    },
+    setMuted(next: boolean) {
+      muted = next
+      gain.gain.value = next ? 0 : 1
+    },
+    get muted() {
+      return muted
+    }
+  }
+}
+
+/**
  * Create the sending peer. The phone always offers (it owns the mic track);
  * LAN-only, so no STUN/TURN — host candidates suffice.
  */

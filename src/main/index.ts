@@ -8,6 +8,7 @@ import { IPC, type AppState, type PairingInfo } from '@shared/ipc'
 import type { DesktopToPhone } from '@shared/protocol'
 import { getLanCandidates } from './net/lanIp'
 import { HotspotManager, wifiQrPayload } from './net/hotspot'
+import { BluetoothAudio } from './net/bluetooth'
 import { loadOrCreateCert, newSessionToken, type CertPair } from './server/certs'
 import { startHttpsServer, type RunningServer } from './server/httpsServer'
 import { SignalingServer } from './server/signaling'
@@ -57,6 +58,7 @@ const runtime: Runtime = {
 const settings = () => new SettingsStore(app.getPath('userData'))
 let settingsStore: SettingsStore
 const hotspot = new HotspotManager()
+const bluetooth = new BluetoothAudio()
 
 function chooseIp(): string {
   const candidates = getLanCandidates()
@@ -155,6 +157,24 @@ function registerIpc(): void {
   ipcMain.handle(IPC.hotspotStop, async () => {
     await hotspot.stop()
     await broadcastState()
+  })
+
+  ipcMain.handle(IPC.btSupported, () => bluetooth.supported)
+
+  ipcMain.handle(IPC.btListDevices, () => bluetooth.listDevices())
+
+  ipcMain.on(IPC.btConnect, (_e, deviceId: string) => {
+    bluetooth.connect(deviceId, (event) => {
+      runtime.win?.webContents.send(IPC.btState, event)
+    })
+  })
+
+  ipcMain.on(IPC.btDisconnect, () => bluetooth.disconnect())
+
+  ipcMain.on(IPC.openSoundSettings, () => {
+    // App volume & device preferences: where the user routes the Bluetooth
+    // helper's output to CABLE Input (one-time; Windows remembers it).
+    void shell.openExternal('ms-settings:apps-volume')
   })
 
   ipcMain.handle(IPC.fixFirewall, () => addFirewallRule(process.execPath))
@@ -315,6 +335,7 @@ if (!gotLock) {
 
   app.on('will-quit', (e) => {
     e.preventDefault()
+    bluetooth.disconnect()
     void hotspot.cleanup().finally(() => {
       runtime.signaling?.close()
       runtime.server?.server.close()
