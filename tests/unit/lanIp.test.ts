@@ -49,4 +49,26 @@ describe('rankCandidates', () => {
     expect(classifyInterface('eth0', '172.16.0.1')).toBe('ethernet-or-wifi')
     expect(classifyInterface('eth0', '172.32.0.1')).toBe('other')
   })
+
+  it('detects USB tether links by subnet and by adapter name', () => {
+    // Android RNDIS default subnet
+    expect(classifyInterface('Ethernet 3', '192.168.42.100')).toBe('usb-tether')
+    // iPhone Personal Hotspot over USB
+    expect(classifyInterface('Ethernet 4', '172.20.10.2')).toBe('usb-tether')
+    // adapter-name hint even on a nonstandard subnet
+    expect(classifyInterface('Remote NDIS based Internet Sharing Device', '10.42.0.5')).toBe(
+      'usb-tether'
+    )
+  })
+
+  it('ranks a USB tether above everything else', () => {
+    const ranked = rankCandidates({
+      'Wi-Fi': [iface('192.168.1.23')],
+      'Local Area Connection* 2': [iface('192.168.137.1')],
+      'Ethernet 3': [iface('192.168.42.100')]
+    })
+    expect(ranked[0]?.address).toBe('192.168.42.100')
+    expect(ranked[0]?.kind).toBe('usb-tether')
+    expect(ranked[1]?.kind).toBe('windows-hotspot')
+  })
 })

@@ -50,6 +50,12 @@ Windows PC and real phones, and must pass before a release is tagged.
 - [ ] PC without Wi-Fi adapter: hotspot button greyed with explanation
 - [ ] Guest Wi-Fi with client isolation: connection fails with the targeted help text
 
+## USB cable mode
+
+- [ ] Android: enable USB tethering → app's Network dropdown shows the tether IP labeled "via USB cable" and auto-prefers it; QR regenerates; stream works with Wi-Fi disabled on both ends
+- [ ] iPhone: Personal Hotspot over USB (Apple driver installed) → 172.20.10.x adapter detected and preferred; stream works
+- [ ] Unplugging the cable mid-stream: app rebinds to Wi-Fi within the 30 s poll, phone reconnects after re-scan
+
 ## Session hardening
 
 - [ ] Second phone scanning the same QR kicks the first ("Another phone took over")

@@ -26,10 +26,29 @@ function isRfc1918(ip: string): boolean {
   return false
 }
 
+/**
+ * USB-tether links (built into the phone OS — no phone app needed):
+ * Android RNDIS/NCM tethering hands the PC an address on 192.168.42.0/24
+ * (some ROMs use .43/.44); iPhone Personal Hotspot over USB uses 172.20.10.0/28.
+ */
+function isUsbTetherSubnet(address: string): boolean {
+  return (
+    address.startsWith('192.168.42.') ||
+    address.startsWith('192.168.43.') ||
+    address.startsWith('192.168.44.') ||
+    address.startsWith('172.20.10.')
+  )
+}
+
+const USB_TETHER_NAME_HINTS = ['rndis', 'remote ndis', 'apple mobile device']
+
 export function classifyInterface(name: string, address: string): LanCandidate['kind'] {
   const lower = name.toLowerCase()
   // Windows Mobile Hotspot hosts its clients on 192.168.137.0/24 by default.
   if (address.startsWith('192.168.137.')) return 'windows-hotspot'
+  if (isUsbTetherSubnet(address) || USB_TETHER_NAME_HINTS.some((h) => lower.includes(h))) {
+    return 'usb-tether'
+  }
   if (VIRTUAL_NAME_HINTS.some((h) => lower.includes(h))) return 'virtual'
   return isRfc1918(address) ? 'ethernet-or-wifi' : 'other'
 }
@@ -37,6 +56,9 @@ export function classifyInterface(name: string, address: string): LanCandidate['
 export function scoreCandidate(kind: LanCandidate['kind'], address: string): number {
   let score = 0
   switch (kind) {
+    case 'usb-tether':
+      score = 95 // a cable plugged in for this purpose beats everything
+      break
     case 'windows-hotspot':
       score = 90 // if the user turned the hotspot on, it is almost certainly the intended path
       break

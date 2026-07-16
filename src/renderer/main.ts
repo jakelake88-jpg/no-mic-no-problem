@@ -62,11 +62,13 @@ function renderPairing(state: AppState): void {
       const opt = document.createElement('option')
       opt.value = c.address
       const label =
-        c.kind === 'windows-hotspot'
-          ? 'via PC hotspot'
-          : c.kind === 'virtual'
-            ? 'virtual adapter'
-            : c.interfaceName
+        c.kind === 'usb-tether'
+          ? 'via USB cable'
+          : c.kind === 'windows-hotspot'
+            ? 'via PC hotspot'
+            : c.kind === 'virtual'
+              ? 'virtual adapter'
+              : c.interfaceName
       opt.textContent = `${c.address} (${label})`
       opt.selected = c.address === state.pairing.ip
       return opt

@@ -31,5 +31,5 @@ export interface LanCandidate {
   /** Higher ranks first in the UI / auto-pick. */
   score: number
   /** Best-effort classification for UI labels. */
-  kind: 'ethernet-or-wifi' | 'windows-hotspot' | 'virtual' | 'other'
+  kind: 'ethernet-or-wifi' | 'windows-hotspot' | 'usb-tether' | 'virtual' | 'other'
 }

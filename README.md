@@ -6,6 +6,7 @@ Use your phone as a **wireless gaming microphone** for your Windows PC.
 - **No cables, no cloud** — audio travels only across your own Wi-Fi network via WebRTC (Opus, ~50–150 ms).
 - **Games see a real microphone** — routed through the free VB-CABLE virtual audio device.
 - **One-click hotspot mode** — no shared Wi-Fi? The app can host a Windows Mobile Hotspot and show a Wi-Fi join QR.
+- **USB cable mode** — plug the phone in and use the OS's built-in tethering; the most reliable, lowest-latency link. Still nothing to install on the phone.
 
 ```
 Phone browser ──getUserMedia──▶ WebRTC (Opus over your LAN)
@@ -34,6 +35,15 @@ VB-CABLE virtual device ──▶ your game selects "CABLE Output" as its mic
 5. In your game / Discord / OBS, pick **CABLE Output (VB-Audio Virtual Cable)** as the microphone. Done — you're live.
 
 Keep the phone page open; locking the screen stops the mic (a platform limit — the app keeps the screen awake while streaming).
+
+## USB cable mode (most reliable)
+
+Wi-Fi flaky, firewalled, or isolated? Plug the phone into the PC and use the phone OS's built-in tethering — no app needed on the phone:
+
+- **Android**: connect the USB cable → Settings → Network & internet → **Hotspot & tethering** → turn on **USB tethering**. Works even without mobile data on most phones.
+- **iPhone**: connect the cable → Settings → **Personal Hotspot** → Allow Others to Join. Windows needs the Apple USB driver (installed with iTunes or "Apple Devices" from the Microsoft Store).
+
+The app detects the tether link automatically, prefers it in the **Network** dropdown ("via USB cable"), and regenerates the QR. Scan and stream as usual — the audio now travels over the cable with the lowest possible latency, immune to router/firewall quirks.
 
 ## Latency
 
