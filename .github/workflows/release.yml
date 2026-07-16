@@ -1,0 +1,43 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build installer and publish release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npx electron-builder --win --publish never
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/NoMicNoProblem-Setup-*.exe
+          generate_release_notes: true
+          draft: false
+          body: |
+            **No Mic? No Problem** — use your phone as a wireless gaming mic. Nothing to install on the phone, everything stays on your local network.
+
+            ### Install
+            1. Download `NoMicNoProblem-Setup-*.exe` below and run it.
+               *Unsigned build: Windows SmartScreen will warn — click **More info → Run anyway**.*
+            2. Allow the app on **Private networks** when Windows asks.
+            3. Follow the in-app VB-CABLE wizard (free virtual mic driver), scan the QR with your phone, and pick **CABLE Output** as your game's microphone.
+
+            See the [README](https://github.com/jakelake88-jpg/no-mic-no-problem#readme) for the full guide and troubleshooting.
