@@ -53,7 +53,9 @@ For when there's no usable network and a cable across the living room isn't happ
 1. Pair the phone with the PC (Windows Settings → Bluetooth).
 2. In the app, open **Bluetooth mode (experimental)** → pick the phone → **Connect**.
 3. One-time routing: the card's _Sound settings_ link opens App volume preferences — set **Windows PowerShell** (the connection helper) output to **CABLE Input**. Windows remembers this.
-4. On the phone page, tap **Bluetooth mode**, then the mic button.
+4. On the phone, open the mic web page as usual (scan the QR — the network is only needed to _load_ the page; the audio then travels over Bluetooth), tap **Bluetooth mode** under the mic, then the mic button.
+
+> Note: no phone Bluetooth setting can send the raw mic on its own — the greyed-out "calls" (HFP) toggle is expected, and "media audio" (A2DP) only carries what an app/page plays. That's why the mic page stays part of the flow: it captures your mic and plays it into the media stream.
 
 Know the trade-offs (they're physics, not bugs): Bluetooth A2DP buffers ~100–250 ms end-to-end — fine for casual chat, noticeable for competitive play; and **everything the phone plays goes into the mic** (enable Do Not Disturb). The app already squeezes what it can: raw capture with no processing delay, an `interactive`-latency audio path, and phones pick the best codec the PC supports (AAC on Windows 11). Prefer Wi-Fi (~80 ms) or USB (best) when available.
 
