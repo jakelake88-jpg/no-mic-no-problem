@@ -65,18 +65,21 @@ try {
   Emit ('HFP_ERROR rfcomm-connect ' + $_.Exception.Message.Replace([Environment]::NewLine, ' '))
   exit 1
 }
-$writer = New-Object Windows.Storage.Streams.DataWriter($socket.OutputStream)
-$reader = New-Object Windows.Storage.Streams.DataReader($socket.InputStream)
-$reader.InputStreamOptions = [Windows.Storage.Streams.InputStreamOptions]::Partial
+# PowerShell 5 cannot construct WinRT DataWriter/DataReader over socket
+# streams; bridge to plain .NET streams instead.
+$netOut = [System.IO.WindowsRuntimeStreamExtensions]::AsStreamForWrite($socket.OutputStream, 0)
+$netIn = [System.IO.WindowsRuntimeStreamExtensions]::AsStreamForRead($socket.InputStream, 0)
 
 function SendAt($cmd) {
-  $writer.WriteString($cmd + "\`r")
-  AwaitAction ($writer.StoreAsync())
+  $bytes = [System.Text.Encoding]::ASCII.GetBytes($cmd + "\`r")
+  $netOut.Write($bytes, 0, $bytes.Length)
+  $netOut.Flush()
 }
 function ReadChunk() {
-  $n = Await ($reader.LoadAsync(1024)) ([UInt32])
-  if ($n -eq 0) { return $null }
-  return $reader.ReadString($reader.UnconsumedBufferLength)
+  $buf = New-Object byte[] 1024
+  $n = $netIn.Read($buf, 0, 1024)
+  if ($n -le 0) { return $null }
+  return [System.Text.Encoding]::ASCII.GetString($buf, 0, $n)
 }
 function Exchange($cmd) {
   Emit ('HFP_AT > ' + $cmd)

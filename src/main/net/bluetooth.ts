@@ -45,8 +45,16 @@ ${PS_PREAMBLE}
 $conn = [Windows.Media.Audio.AudioPlaybackConnection]::TryCreateFromId('__DEVICE_ID__')
 if ($null -eq $conn) { Write-Output 'BT_ERROR create-failed'; exit 1 }
 $conn.Start()
-$result = $conn.Open()
-if ($result.Status -ne 'Success') { Write-Output ('BT_ERROR open-failed ' + $result.Status); exit 1 }
+# The radio can be momentarily busy (profile churn, previous session closing):
+# retry the open a few times before giving up.
+$status = $null
+for ($attempt = 1; $attempt -le 4; $attempt++) {
+  $result = $conn.Open()
+  $status = $result.Status
+  if ($status -eq 'Success') { break }
+  Start-Sleep -Seconds 2
+}
+if ($status -ne 'Success') { Write-Output ('BT_ERROR open-failed ' + $status); exit 1 }
 Write-Output 'BT_CONNECTED'
 while ($true) {
   Start-Sleep -Seconds 1
