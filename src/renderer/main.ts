@@ -379,6 +379,48 @@ async function initBluetooth(): Promise<void> {
   card.addEventListener('toggle', () => {
     if (card.hasAttribute('open')) void refresh()
   })
+
+  // ---- calls (hands-free) link test ----
+  const hfpBtn = $<HTMLButtonElement>('hfp-connect')
+  const hfpStatus = $('hfp-status')
+  const hfpTrace = $<HTMLPreElement>('hfp-trace')
+  let hfpConnected = false
+  const traceLines: string[] = []
+
+  hfpBtn.addEventListener('click', () => {
+    if (hfpConnected) {
+      window.api.hfpDisconnect()
+      hfpConnected = false
+      hfpBtn.textContent = 'Connect calls link'
+      hfpStatus.textContent = 'Calls link: not connected'
+      return
+    }
+    const name = deviceSelect.selectedOptions[0]?.textContent
+    if (!name || !deviceSelect.value) return
+    traceLines.length = 0
+    hfpTrace.hidden = false
+    hfpTrace.textContent = ''
+    window.api.hfpConnect(name)
+  })
+
+  window.api.onHfpState((e) => {
+    if (e.trace) {
+      traceLines.push(e.trace.replace(/^HFP_(AT|EVENT|INFO)\s*/, ''))
+      if (traceLines.length > 40) traceLines.shift()
+      hfpTrace.textContent = traceLines.join('\n')
+      return
+    }
+    hfpConnected = e.state === 'connected'
+    hfpBtn.textContent = hfpConnected ? 'Disconnect calls link' : 'Connect calls link'
+    hfpStatus.textContent =
+      e.state === 'connected'
+        ? 'Calls link: CONNECTED — check your phone: the calls toggle should now show active. Talk and watch the trace: no mic audio will arrive outside a real phone call.'
+        : e.state === 'connecting'
+          ? 'Calls link: connecting…'
+          : e.state === 'error'
+            ? `Calls link failed: ${e.detail ?? 'unknown'} (is the phone paired and in range?)`
+            : 'Calls link: not connected'
+  })
 }
 
 // ---------- settings ----------

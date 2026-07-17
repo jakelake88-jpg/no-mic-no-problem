@@ -113,6 +113,19 @@
         <button id="bt-connect">Connect</button>
       </div>
       <p id="bt-status" class="hint">Not connected</p>
+      <hr class="divider" />
+      <p class="hint">
+        <strong>Calls (hands-free) link — test.</strong> Connects the Bluetooth
+        <em>calls/phone-audio</em> profile so your phone treats this PC as a call device (the toggle
+        your phone greys out). Heads-up: this profile only carries audio during an actual phone
+        call, and its mic flows <em>toward</em> the phone — the live trace below shows exactly what
+        your phone sends.
+      </p>
+      <div class="row">
+        <button id="hfp-connect" class="ghost">Connect calls link</button>
+      </div>
+      <p id="hfp-status" class="hint">Calls link: not connected</p>
+      <pre id="hfp-trace" hidden></pre>
     </details>
 
     <details id="settings" class="card">

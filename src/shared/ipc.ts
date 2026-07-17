@@ -24,6 +24,9 @@ export const IPC = {
   btConnect: 'bt:connect',
   btDisconnect: 'bt:disconnect',
   btState: 'bt:state',
+  hfpConnect: 'hfp:connect',
+  hfpDisconnect: 'hfp:disconnect',
+  hfpState: 'hfp:state',
   openSoundSettings: 'app:open-sound-settings',
   fixFirewall: 'firewall:fix',
   copyDiagnostics: 'diagnostics:copy',
@@ -80,6 +83,12 @@ export interface BtStateInfo {
   detail?: string
 }
 
+export interface HfpStateInfo {
+  state?: 'disconnected' | 'connecting' | 'connected' | 'error'
+  detail?: string
+  trace?: string
+}
+
 export type VbCableProgress =
   | { step: 'downloading'; receivedBytes: number; totalBytes: number | null }
   | { step: 'extracting' }
@@ -110,6 +119,9 @@ export interface RendererApi {
   btConnect(deviceId: string): void
   btDisconnect(): void
   onBtState(cb: (e: BtStateInfo) => void): () => void
+  hfpConnect(deviceName: string): void
+  hfpDisconnect(): void
+  onHfpState(cb: (e: HfpStateInfo) => void): () => void
   openSoundSettings(): void
   fixFirewall(): Promise<boolean>
   copyDiagnostics(rendererBlob: string): Promise<void>

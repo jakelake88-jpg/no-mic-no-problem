@@ -9,6 +9,7 @@ import type { DesktopToPhone } from '@shared/protocol'
 import { getLanCandidates } from './net/lanIp'
 import { HotspotManager, wifiQrPayload } from './net/hotspot'
 import { BluetoothAudio } from './net/bluetooth'
+import { HfpLink } from './net/hfp'
 import { loadOrCreateCert, newSessionToken, type CertPair } from './server/certs'
 import { startHttpsServer, type RunningServer } from './server/httpsServer'
 import { SignalingServer } from './server/signaling'
@@ -59,6 +60,7 @@ const settings = () => new SettingsStore(app.getPath('userData'))
 let settingsStore: SettingsStore
 const hotspot = new HotspotManager()
 const bluetooth = new BluetoothAudio()
+const hfp = new HfpLink()
 
 function chooseIp(): string {
   const candidates = getLanCandidates()
@@ -176,6 +178,14 @@ function registerIpc(): void {
   })
 
   ipcMain.on(IPC.btDisconnect, () => bluetooth.disconnect())
+
+  ipcMain.on(IPC.hfpConnect, (_e, deviceName: string) => {
+    hfp.connect(deviceName, (event) => {
+      runtime.win?.webContents.send(IPC.hfpState, event)
+    })
+  })
+
+  ipcMain.on(IPC.hfpDisconnect, () => hfp.disconnect())
 
   ipcMain.on(IPC.openSoundSettings, () => {
     // App volume & device preferences: where the user routes the Bluetooth
@@ -342,6 +352,7 @@ if (!gotLock) {
   app.on('will-quit', (e) => {
     e.preventDefault()
     bluetooth.disconnect()
+    hfp.disconnect()
     void hotspot.cleanup().finally(() => {
       runtime.signaling?.close()
       runtime.server?.server.close()
