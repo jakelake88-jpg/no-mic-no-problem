@@ -135,9 +135,11 @@
       >
       <label><input type="checkbox" id="set-autolaunch" /> Start with Windows</label>
       <label><input type="checkbox" id="set-startmin" /> Start minimized</label>
-      <button id="fix-firewall" class="ghost">
-        Fix firewall (if your phone can't connect after clicking Deny)
-      </button>
+      <div class="row">
+        <button id="doctor-run">Test connection</button>
+        <button id="fix-firewall" class="ghost">Fix firewall</button>
+      </div>
+      <div id="doctor-result" hidden></div>
     </details>
 
     <details id="diagnostics" class="card">

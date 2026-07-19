@@ -17,6 +17,7 @@ import { SettingsStore } from './settings'
 import { registryHasVbCable } from './vbcable/detect'
 import { installVbCable } from './vbcable/installer'
 import { addFirewallRule } from './firewall'
+import { makeNetworkPrivate, runConnectivityReport } from './net/doctor'
 import { createTray, type TrayController } from './tray'
 
 const IS_E2E = process.argv.includes('--e2e')
@@ -194,6 +195,10 @@ function registerIpc(): void {
   })
 
   ipcMain.handle(IPC.fixFirewall, () => addFirewallRule(process.execPath))
+
+  ipcMain.handle(IPC.doctorRun, () => runConnectivityReport())
+
+  ipcMain.handle(IPC.doctorMakePrivate, (_e, alias: string) => makeNetworkPrivate(alias))
 
   ipcMain.handle(IPC.copyDiagnostics, async (_e, rendererBlob: string) => {
     const state = await buildState()

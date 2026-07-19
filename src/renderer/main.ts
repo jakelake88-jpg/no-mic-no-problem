@@ -450,6 +450,62 @@ async function initSettings(): Promise<void> {
       ? 'Firewall rule added ✓'
       : 'Could not add rule (UAC declined?)'
   })
+
+  // connection doctor: diagnose the silent-timeout causes in one click
+  const doctorBtn = $<HTMLButtonElement>('doctor-run')
+  const doctorResult = $('doctor-result')
+  doctorBtn.addEventListener('click', async () => {
+    doctorBtn.disabled = true
+    doctorBtn.textContent = 'Testing…'
+    const report = await window.api.doctorRun()
+    doctorResult.hidden = false
+    doctorResult.replaceChildren()
+
+    const addLine = (text: string, ok: boolean): HTMLParagraphElement => {
+      const p = document.createElement('p')
+      p.className = 'hint'
+      p.textContent = `${ok ? '✓' : '⚠'} ${text}`
+      p.style.color = ok ? 'var(--live)' : 'var(--amber)'
+      doctorResult.append(p)
+      return p
+    }
+
+    let anyProblem = false
+    for (const prof of report.profiles) {
+      const isOk = prof.category === 'private' || prof.category === 'domain'
+      const line = addLine(
+        `Network "${prof.alias}": ${prof.category}` +
+          (isOk ? '' : ' — Windows silently blocks incoming connections on Public networks'),
+        isOk
+      )
+      if (!isOk) {
+        anyProblem = true
+        const fix = document.createElement('button')
+        fix.textContent = `Make "${prof.alias}" Private`
+        fix.addEventListener('click', async () => {
+          fix.disabled = true
+          const ok = await window.api.doctorMakePrivate(prof.alias)
+          fix.textContent = ok ? 'Done — re-scan the QR ✓' : 'Failed (UAC declined?)'
+        })
+        line.after(fix)
+      }
+    }
+    addLine(
+      report.ruleExists
+        ? 'Firewall rule for this app is present'
+        : 'Firewall rule missing — click Fix firewall',
+      report.ruleExists
+    )
+    if (!report.ruleExists) anyProblem = true
+    if (!anyProblem) {
+      addLine(
+        'PC side looks good. If the phone still times out, it is on a different network (compare the phone’s Wi‑Fi IP with the Network dropdown) or the router isolates devices — USB tethering bypasses both.',
+        true
+      )
+    }
+    doctorBtn.disabled = false
+    doctorBtn.textContent = 'Test connection'
+  })
 }
 
 // ---------- diagnostics ----------

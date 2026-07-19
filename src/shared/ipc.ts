@@ -29,6 +29,8 @@ export const IPC = {
   hfpState: 'hfp:state',
   openSoundSettings: 'app:open-sound-settings',
   fixFirewall: 'firewall:fix',
+  doctorRun: 'doctor:run',
+  doctorMakePrivate: 'doctor:make-private',
   copyDiagnostics: 'diagnostics:copy',
   openExternal: 'app:open-external',
   logFromRenderer: 'log:renderer',
@@ -124,6 +126,11 @@ export interface RendererApi {
   onHfpState(cb: (e: HfpStateInfo) => void): () => void
   openSoundSettings(): void
   fixFirewall(): Promise<boolean>
+  doctorRun(): Promise<{
+    profiles: { alias: string; category: 'public' | 'private' | 'domain' | 'unknown' }[]
+    ruleExists: boolean
+  }>
+  doctorMakePrivate(alias: string): Promise<boolean>
   copyDiagnostics(rendererBlob: string): Promise<void>
   openExternal(url: string): void
   log(level: 'info' | 'warn' | 'error', message: string): void
