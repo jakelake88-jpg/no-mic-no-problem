@@ -356,9 +356,8 @@ if (!gotLock) {
 
   app.on('will-quit', (e) => {
     e.preventDefault()
-    bluetooth.disconnect()
     hfp.disconnect()
-    void hotspot.cleanup().finally(() => {
+    void Promise.allSettled([hotspot.cleanup(), bluetooth.cleanup()]).then(() => {
       runtime.signaling?.close()
       runtime.server?.server.close()
       app.exit(0)

@@ -1,5 +1,6 @@
 import { execFile, spawn, type ChildProcess } from 'node:child_process'
 import log from 'electron-log'
+import { AudioRouter } from './audioRouting'
 
 const btLog = log.scope('bluetooth')
 
@@ -83,7 +84,10 @@ export function parseDeviceList(stdout: string): BtDevice[] {
 export type BtState = 'disconnected' | 'connecting' | 'connected' | 'error'
 
 export interface BtStateEvent {
-  state: BtState
+  state?: BtState
+  /** Emitted after 'connected': was the audio auto-routed to the virtual mic
+   * ('auto'), or does the user need the manual Sound settings step ('manual')? */
+  routing?: 'auto' | 'manual'
   detail?: string
 }
 
@@ -120,11 +124,14 @@ const defaultSpawn: SpawnFn = (script) =>
 
 export class BluetoothAudio {
   private child: ChildProcess | null = null
+  private routed = false
+  private pendingUnroute: Promise<void> | null = null
 
   constructor(
     private listRunner: ListRunner = defaultListRunner,
     private spawnFn: SpawnFn = defaultSpawn,
-    private platform: string = process.platform
+    private platform: string = process.platform,
+    private router: AudioRouter = new AudioRouter()
   ) {}
 
   get supported(): boolean {
@@ -162,6 +169,20 @@ export class BluetoothAudio {
         if (event) {
           btLog.info(`state: ${event.state}${event.detail ? ` (${event.detail})` : ''}`)
           onState(event)
+          // Audio now plays in this helper's session; route it to the virtual
+          // mic so games hear it without the manual App-volume step.
+          if (event.state === 'connected') {
+            void this.router.routeToVirtualMic().then((result) => {
+              if (this.child !== child) {
+                // Disconnected while routing was in flight — undo a route that
+                // landed anyway, and keep the stale event from the UI.
+                if (result.ok) this.pendingUnroute = this.router.unroute()
+                return
+              }
+              this.routed = result.ok
+              onState({ routing: result.ok ? 'auto' : 'manual', detail: result.detail })
+            })
+          }
         }
       }
     })
@@ -183,5 +204,17 @@ export class BluetoothAudio {
       child.kill()
       btLog.info('connection released')
     }
+    if (this.routed) {
+      // Undo the powershell.exe -> virtual mic route so unrelated PowerShell
+      // audio stops landing in the game mic once the session is over.
+      this.routed = false
+      this.pendingUnroute = this.router.unroute()
+    }
+  }
+
+  /** disconnect() plus waiting for the route cleanup — for app shutdown. */
+  async cleanup(): Promise<void> {
+    this.disconnect()
+    if (this.pendingUnroute) await this.pendingUnroute
   }
 }

@@ -81,7 +81,10 @@ export interface BtDeviceInfo {
 }
 
 export interface BtStateInfo {
-  state: 'disconnected' | 'connecting' | 'connected' | 'error'
+  state?: 'disconnected' | 'connecting' | 'connected' | 'error'
+  /** After 'connected': 'auto' = audio routed to the virtual mic for you;
+   * 'manual' = auto-routing failed, show the Sound settings fallback. */
+  routing?: 'auto' | 'manual'
   detail?: string
 }
 

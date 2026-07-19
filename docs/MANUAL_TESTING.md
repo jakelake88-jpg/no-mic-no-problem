@@ -59,7 +59,10 @@ Windows PC and real phones, and must pass before a release is tagged.
 ## Bluetooth mode (experimental)
 
 - [ ] Paired phone appears in the Bluetooth card's device list; Connect reaches "Connected"
-- [ ] App volume routing: "Windows PowerShell" set to CABLE Input → phone BT-mode audio reaches Discord/game via CABLE Output
+- [ ] Auto-routing: card shows "audio routed to the virtual mic (CABLE Input…)" → phone BT-mode audio reaches Discord/game via CABLE Output with NO App-volume edits (verify on Win10 21H2+, Win10 2004–21H1 legacy IID, and Win11)
+- [ ] ms-settings:apps-volume shows "Windows PowerShell" → CABLE Input while connected; entry reverts to Default after Disconnect and after app quit
+- [ ] Auto-route failure path: with VB-CABLE absent, card shows the manual Sound-settings fallback copy
+- [ ] Manual fallback still works: "Windows PowerShell" set to CABLE Input by hand → audio reaches the game
 - [ ] Latency sanity: measure clap-to-playback; expect 100–250 ms (SBC) / lower on Win11+AAC
 - [ ] Phone notification sounds audibly leak into the stream (documented behavior; DND hint shown)
 - [ ] Feedback guard: starting phone BT mode while NOT BT-connected produces speaker feedback — verify the warning copy shows before start
