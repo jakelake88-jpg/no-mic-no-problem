@@ -1,6 +1,6 @@
 {
   "name": "no-mic-no-problem",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Use your phone as a wireless gaming microphone — no phone app, no cloud, no cables.",
   "main": "out/main/index.js",
   "author": "jakelake88-jpg",
