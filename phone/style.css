@@ -1,0 +1,238 @@
+:root {
+  color-scheme: dark;
+  --bg: #0b0e14;
+  --card: #11151d;
+  --border: #232a36;
+  --fg: #e9edf3;
+  --dim: #8b94a3;
+  --faint: #5a6474;
+  --accent: #6a8dff;
+  --accent-2: #8b5cf6;
+  --live: #34d399;
+  --warn: #f87171;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  background:
+    radial-gradient(1000px 500px at 50% -10%, rgba(106, 141, 255, 0.09), transparent 60%),
+    radial-gradient(800px 400px at 50% 110%, rgba(139, 92, 246, 0.07), transparent 60%), var(--bg);
+  color: var(--fg);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding: 28px 24px;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+}
+
+h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+h1 span {
+  background: linear-gradient(100deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* status pill with a state dot */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--dim);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+.pill::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--faint);
+  flex: none;
+}
+body[data-state='streaming'] .pill {
+  border-color: rgba(52, 211, 153, 0.35);
+  color: var(--live);
+}
+body[data-state='streaming'] .pill::before {
+  background: var(--live);
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.9);
+  animation: blink 1.6s ease-in-out infinite;
+}
+body[data-state='connecting'] .pill::before,
+body[data-state='reconnecting'] .pill::before {
+  background: var(--accent);
+  animation: blink 0.9s ease-in-out infinite;
+}
+body[data-state='kicked'] .pill,
+body[data-state='bad-token'] .pill,
+body[data-state='mic-denied'] .pill,
+body[data-state='failed'] .pill {
+  border-color: rgba(248, 113, 113, 0.35);
+  color: var(--warn);
+}
+body[data-state='kicked'] .pill::before,
+body[data-state='bad-token'] .pill::before,
+body[data-state='mic-denied'] .pill::before,
+body[data-state='failed'] .pill::before {
+  background: var(--warn);
+}
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* the mic button */
+#mic-button {
+  width: 172px;
+  height: 172px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: radial-gradient(120px 120px at 50% 30%, #1a2130, #12161f 70%);
+  color: var(--dim);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  position: relative;
+  transition:
+    color 0.25s,
+    transform 0.12s,
+    box-shadow 0.25s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+#mic-button::after {
+  content: '';
+  position: absolute;
+  inset: -9px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  transition: border-color 0.25s;
+}
+#mic-button:active {
+  transform: scale(0.96);
+}
+#mic-button.active {
+  color: var(--live);
+  border-color: rgba(52, 211, 153, 0.55);
+  background: radial-gradient(120px 120px at 50% 30%, rgba(52, 211, 153, 0.14), #12161f 75%);
+  box-shadow:
+    0 0 54px rgba(52, 211, 153, 0.28),
+    inset 0 0 26px rgba(52, 211, 153, 0.1);
+}
+#mic-button.active::after {
+  border-color: rgba(52, 211, 153, 0.45);
+  animation: pulse 2.2s ease-out infinite;
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  70%,
+  100% {
+    transform: scale(1.22);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #mic-button.active::after,
+  .pill::before {
+    animation: none !important;
+  }
+}
+
+.meter {
+  width: 100%;
+  height: 10px;
+  border-radius: 6px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+#meter-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--live), #eab308 70%, var(--warn));
+  transition: width 60ms linear;
+}
+
+#mute-button {
+  padding: 11px 34px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--fg);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+#mute-button.muted {
+  border-color: rgba(248, 113, 113, 0.5);
+  color: var(--warn);
+}
+
+.mode-toggle {
+  padding: 9px 20px;
+  border-radius: 999px;
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--faint);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+}
+.mode-toggle.active {
+  border-style: solid;
+  border-color: rgba(106, 141, 255, 0.55);
+  color: var(--accent);
+  background: rgba(106, 141, 255, 0.08);
+}
+
+.detail {
+  color: var(--dim);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  min-height: 2.4em;
+}
+
+footer p {
+  color: var(--faint);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}

@@ -1,0 +1,46 @@
+{
+  "name": "no-mic-no-problem",
+  "version": "0.1.6",
+  "description": "Use your phone as a wireless gaming microphone — no phone app, no cloud, no cables.",
+  "main": "out/main/index.js",
+  "author": "jakelake88-jpg",
+  "license": "MIT",
+  "private": true,
+  "homepage": "https://github.com/jakelake88-jpg/no-mic-no-problem",
+  "scripts": {
+    "dev": "npm run build:phone && electron-vite dev",
+    "build": "npm run gen:licenses && npm run build:phone && electron-vite build",
+    "build:phone": "vite build --config vite.phone.config.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "lint": "eslint .",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "test": "vitest run",
+    "test:e2e": "bash tests/e2e/run-e2e.sh",
+    "dist:win": "npm run build && electron-builder --win --publish never",
+    "dist:msix": "npm run build && electron-builder --win appx --publish never",
+    "gen:licenses": "node scripts/gen-licenses.mjs"
+  },
+  "dependencies": {
+    "electron-log": "^5.2.0",
+    "extract-zip": "^2.0.1",
+    "qrcode": "^1.5.4",
+    "selfsigned": "^2.4.1",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/qrcode": "^1.5.5",
+    "@types/ws": "^8.5.13",
+    "electron": "^31.7.0",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^2.3.0",
+    "eslint": "^9.15.0",
+    "playwright": "^1.61.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.15.0",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.5"
+  }
+}
