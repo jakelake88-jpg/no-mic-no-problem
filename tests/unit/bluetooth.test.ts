@@ -7,6 +7,7 @@ import {
   parseDeviceList,
   type BtStateEvent
 } from '../../src/main/net/bluetooth'
+import type { AudioRouter } from '../../src/main/net/audioRouting'
 
 class FakeChild extends EventEmitter {
   stdout = new EventEmitter()
@@ -17,6 +18,15 @@ class FakeChild extends EventEmitter {
     return true
   }
 }
+
+function fakeRouter(ok = true, detail = 'CABLE Input (VB-Audio Virtual Cable)'): AudioRouter {
+  return {
+    routeToVirtualMic: vi.fn().mockResolvedValue({ ok, detail }),
+    unroute: vi.fn().mockResolvedValue(undefined)
+  } as unknown as AudioRouter
+}
+
+const flush = (): Promise<void> => new Promise((r) => setTimeout(r, 0))
 
 describe('parseDeviceList', () => {
   it('parses a JSON array of devices', () => {
@@ -70,7 +80,7 @@ describe('BluetoothAudio', () => {
   it('connect emits connecting, then states from helper stdout; disconnect kills silently', () => {
     const child = new FakeChild()
     const spawnFn = vi.fn().mockReturnValue(child as unknown as ChildProcess)
-    const bt = new BluetoothAudio(vi.fn(), spawnFn, 'win32')
+    const bt = new BluetoothAudio(vi.fn(), spawnFn, 'win32', fakeRouter())
     const events: BtStateEvent[] = []
 
     bt.connect("BT#dev'1", (e) => events.push(e))
@@ -93,7 +103,8 @@ describe('BluetoothAudio', () => {
     const bt = new BluetoothAudio(
       vi.fn(),
       vi.fn().mockReturnValue(child as unknown as ChildProcess),
-      'win32'
+      'win32',
+      fakeRouter()
     )
     const events: BtStateEvent[] = []
     bt.connect('BT#1', (e) => events.push(e))
@@ -106,7 +117,8 @@ describe('BluetoothAudio', () => {
     const bt = new BluetoothAudio(
       vi.fn(),
       vi.fn().mockReturnValue(child as unknown as ChildProcess),
-      'win32'
+      'win32',
+      fakeRouter()
     )
     const events: BtStateEvent[] = []
     bt.connect('BT#1', (e) => events.push(e))
@@ -116,5 +128,95 @@ describe('BluetoothAudio', () => {
       { state: 'connected' },
       { state: 'disconnected', detail: 'closed' }
     ])
+  })
+
+  it('auto-routes to the virtual mic on connect and reports routing: auto', async () => {
+    const child = new FakeChild()
+    const router = fakeRouter()
+    const bt = new BluetoothAudio(
+      vi.fn(),
+      vi.fn().mockReturnValue(child as unknown as ChildProcess),
+      'win32',
+      router
+    )
+    const events: BtStateEvent[] = []
+    bt.connect('BT#1', (e) => events.push(e))
+    child.stdout.emit('data', Buffer.from('BT_CONNECTED\n'))
+    await flush()
+    expect(router.routeToVirtualMic).toHaveBeenCalledOnce()
+    expect(events[2]).toEqual({
+      routing: 'auto',
+      detail: 'CABLE Input (VB-Audio Virtual Cable)'
+    })
+  })
+
+  it('reports routing: manual when auto-routing fails', async () => {
+    const child = new FakeChild()
+    const bt = new BluetoothAudio(
+      vi.fn(),
+      vi.fn().mockReturnValue(child as unknown as ChildProcess),
+      'win32',
+      fakeRouter(false, 'virtual-mic-not-found')
+    )
+    const events: BtStateEvent[] = []
+    bt.connect('BT#1', (e) => events.push(e))
+    child.stdout.emit('data', Buffer.from('BT_CONNECTED\n'))
+    await flush()
+    expect(events[2]).toEqual({ routing: 'manual', detail: 'virtual-mic-not-found' })
+  })
+
+  it('suppresses the routing event and undoes the route when disconnected mid-flight', async () => {
+    const child = new FakeChild()
+    const router = fakeRouter()
+    const bt = new BluetoothAudio(
+      vi.fn(),
+      vi.fn().mockReturnValue(child as unknown as ChildProcess),
+      'win32',
+      router
+    )
+    const events: BtStateEvent[] = []
+    bt.connect('BT#1', (e) => events.push(e))
+    child.stdout.emit('data', Buffer.from('BT_CONNECTED\n'))
+    bt.disconnect() // before the route promise resolves
+    await flush()
+    expect(events.some((e) => e.routing)).toBe(false)
+    // the route landed after disconnect; it must still be cleaned up
+    expect(router.unroute).toHaveBeenCalledOnce()
+  })
+
+  it('unroutes on disconnect only when the route actually took hold', async () => {
+    const child = new FakeChild()
+    const router = fakeRouter()
+    const bt = new BluetoothAudio(
+      vi.fn(),
+      vi.fn().mockReturnValue(child as unknown as ChildProcess),
+      'win32',
+      router
+    )
+    bt.connect('BT#1', () => undefined)
+    child.stdout.emit('data', Buffer.from('BT_CONNECTED\n'))
+    await flush()
+    await bt.cleanup()
+    expect(router.unroute).toHaveBeenCalledOnce()
+
+    // second cleanup: nothing new to undo
+    await bt.cleanup()
+    expect(router.unroute).toHaveBeenCalledOnce()
+  })
+
+  it('does not unroute when routing never succeeded', async () => {
+    const child = new FakeChild()
+    const router = fakeRouter(false, 'nope')
+    const bt = new BluetoothAudio(
+      vi.fn(),
+      vi.fn().mockReturnValue(child as unknown as ChildProcess),
+      'win32',
+      router
+    )
+    bt.connect('BT#1', () => undefined)
+    child.stdout.emit('data', Buffer.from('BT_CONNECTED\n'))
+    await flush()
+    await bt.cleanup()
+    expect(router.unroute).not.toHaveBeenCalled()
   })
 })

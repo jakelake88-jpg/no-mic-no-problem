@@ -51,9 +51,8 @@ The app detects the tether link automatically, prefers it in the **Network** dro
 For when there's no usable network and a cable across the living room isn't happening. The PC becomes an A2DP sink (Windows 10 2004+ built-in, via the `AudioPlaybackConnection` API) and the phone streams its mic over Bluetooth like music:
 
 1. Pair the phone with the PC (Windows Settings → Bluetooth).
-2. In the app, open **Bluetooth mode (experimental)** → pick the phone → **Connect**.
-3. One-time routing: the card's _Sound settings_ link opens App volume preferences — set **Windows PowerShell** (the connection helper) output to **CABLE Input**. Windows remembers this.
-4. On the phone, open the mic web page as usual (scan the QR — the network is only needed to _load_ the page; the audio then travels over Bluetooth), tap **Bluetooth mode** under the mic, then the mic button.
+2. In the app, open **Bluetooth mode (experimental)** → pick the phone → **Connect**. On connect the app routes the incoming Bluetooth audio straight into **CABLE Input** (the virtual mic), so your game hears it on **CABLE Output** with no extra setup. While connected, all PowerShell audio shares that route; it's restored on Disconnect/quit. If auto-routing fails (very old Windows 10 builds), the card falls back to the one-time manual step: _Sound settings_ → set **Windows PowerShell** output to **CABLE Input**.
+3. On the phone, open the mic web page as usual (scan the QR — the network is only needed to _load_ the page; the audio then travels over Bluetooth), tap **Bluetooth mode** under the mic, then the mic button.
 
 > Note: no phone Bluetooth setting can send the raw mic on its own — the greyed-out "calls" (HFP) toggle is expected, and "media audio" (A2DP) only carries what an app/page plays. That's why the mic page stays part of the flow: it captures your mic and plays it into the media stream.
 

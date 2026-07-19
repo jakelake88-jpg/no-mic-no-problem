@@ -363,11 +363,20 @@ async function initBluetooth(): Promise<void> {
   })
 
   window.api.onBtState((e) => {
+    if (e.routing) {
+      if (!connected) return // routing result arrived after a disconnect
+      status.textContent =
+        e.routing === 'auto'
+          ? `Connected — audio routed to the virtual mic (${e.detail || 'CABLE Input'}) ✓ Start Bluetooth mode on the phone page; your game hears it on CABLE Output.`
+          : `Connected, but auto-routing failed (${e.detail || 'unknown'}). One-time manual fix: open Sound settings above and set "Windows PowerShell" output to CABLE Input.`
+      return
+    }
+    if (!e.state) return
     connected = e.state === 'connected'
     connectBtn.textContent = connected ? 'Disconnect' : 'Connect'
     status.textContent =
       e.state === 'connected'
-        ? 'Connected — phone audio now plays on this PC. Start Bluetooth mode on the phone page.'
+        ? 'Connected — routing phone audio to the virtual mic…'
         : e.state === 'connecting'
           ? 'Connecting… (accept any prompt on the phone)'
           : e.state === 'error'
